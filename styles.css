@@ -1,0 +1,93 @@
+body {
+    background-color: #181818;
+    color: #fff;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    height: 100vh;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #FFC107;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.avatar .face {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar .face::before {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: #000;
+    border-radius: 50%;
+    margin: 5px auto;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+.message user-mesage {
+
+    background-color: #adb9d1;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.message {
+    background-color: #282C34;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+
+}
+
+.input-container {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+}
+
+input[type="text"] { width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #FFC107;
+    padding: 10px 20px;
+    border: none;
+    display: inline-block;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #FFA07A;
+}
