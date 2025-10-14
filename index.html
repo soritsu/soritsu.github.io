@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física 3 - Electromagnetismo Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 14, 39, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1001;
+        }
+
+        .logo span {
+            font-size: 1.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav-menu a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .nav-menu a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #00d4ff;
+            border-radius: 3px;
+            transition: 0.3s;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(7px, 7px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Dropdown */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .dropdown-toggle::after {
+            content: '▼';
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown:hover .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(10, 14, 39, 0.95);
+            min-width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: min(500px, 80vw);
+            height: min(500px, 80vw);
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -25%;
+            right: -25%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: min(400px, 70vw);
+            height: min(400px, 70vw);
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -20%;
+            left: -20%;
+            animation: pulse 5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00d4ff 0%, #8a2be2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: #b0b8c8;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            padding: 0 1rem;
+        }
+
+        /* Botón */
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            margin: 10px;
+            background: linear-gradient(135deg, #00d4ff 0%, #8a2be2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.5);
+        }
+
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Sections */
+        .section {
+            min-height: 100vh;
+            padding: clamp(3rem, 10vw, 6rem) 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            margin-bottom: 1rem;
+            text-align: center;
+            background: linear-gradient(135deg, #00d4ff 0%, #8a2be2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #b0b8c8;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+            margin-bottom: 2rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: clamp(1.5rem, 4vw, 2rem);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .card-icon {
+            font-size: clamp(2rem, 6vw, 3rem);
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+            margin-bottom: 0.5rem;
+            color: #00d4ff;
+        }
+
+        .card strong {
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            margin-bottom: 0.5rem;
+            color: #00d4ff;
+        }
+
+        .card p {
+            color: #b0b8c8;
+            line-height: 1.6;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            margin-bottom: 0.8rem;
+        }
+
+        .theory-content {
+            margin: 1.5rem 0;
+        }
+
+        .theory-content p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: clamp(1rem, 3vw, 1.5rem);
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2a5298;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            text-align: center;
+            overflow-x: auto;
+            word-wrap: break-word;
+        }
+
+        /* Botón scroll to top */
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00d4ff 0%, #8a2be2 100%);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 999;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        /* Tablets */
+        @media (min-width: 768px) {
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .logo span {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 6rem 2rem;
+            }
+
+            .hero {
+                padding: 2rem;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 767px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 60px;
+                flex-direction: column;
+                background: rgba(10, 14, 39, 0.98);
+                width: 100%;
+                text-align: center;
+                transition: left 0.3s ease;
+                padding: 1rem 0;
+                gap: 0;
+                max-height: calc(100vh - 60px);
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-menu li {
+                width: 100%;
+                padding: 0.5rem 0;
+            }
+
+            .nav-menu a {
+                display: block;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .dropdown-menu {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                display: none;
+                background: rgba(0, 212, 255, 0.05);
+                margin: 0.5rem 1rem;
+            }
+
+            .dropdown.active .dropdown-menu {
+                display: block;
+            }
+
+            .dropdown-toggle::after {
+                margin-left: auto;
+            }
+
+            .dropdown-toggle {
+                width: 100%;
+                justify-content: space-between;
+                padding: 1rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-button {
+                padding: 0.8rem 1.5rem;
+                margin: 8px;
+            }
+
+            .formula {
+                font-size: 0.85rem;
+                padding: 0.8rem;
+            }
+        }
+
+        /* Desktop grande */
+        @media (min-width: 1200px) {
+            .section {
+                padding: 8rem 2rem;
+            }
+        }
+
+        /* Muy pequeño */
+        @media (max-width: 380px) {
+            .card {
+                padding: 1.2rem;
+            }
+
+            .cta-button {
+                padding: 0.7rem 1.2rem;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#inicio" class="logo">
+                <span>⚡</span> Electrostática
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#coulomb">Ley de Coulomb</a></li>
+                <li><a href="#campo">Campo Eléctrico</a></li>
+                <li><a href="#gauss">Ley de Gauss</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle">Calculadora Basica</a>
+                    <div class="dropdown-menu">
+                        <a href="calc_Basica.html?calc=coulomb">Ley de Coulomb</a>
+                        <a href="calc_Basica.html?calc=electric-field">Campo Eléctrico</a>
+                        <a href="calc_Basica.html?calc=gauss">Ley de Gauss</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle">Calculadora avanzada</a>
+                    <div class="dropdown-menu">
+                        <a href="#calc-coulomb">Ley de Coulomb</a>
+                        <a href="#calc-campo">Campo Eléctrico</a>
+                        <a href="#calc-gauss">Ley de Gauss</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <h1>Física 3 Interactiva</h1>
+            <p>Explora, calcula y visualiza los fenómenos del electromagnetismo y la física moderna con herramientas interactivas avanzadas</p>
+            <a href="#coulomb" class="cta-button">Comenzar a Explorar</a>
+        </div>
+    </section>
+
+    <!-- Ley de Coulomb Section -->
+    <section class="section" id="electrostatica">
+        <div class="card" id="coulomb">
+            <h2 class="section-title">⚡ Ley de Coulomb</h2>
+            <div class="theory-content">
+                <p>La <strong>Ley de Coulomb</strong> describe la fuerza electrostática entre dos cargas puntuales. Es una de las leyes fundamentales del electromagnetismo y establece que la fuerza entre dos cargas es directamente proporcional al producto de sus magnitudes e inversamente proporcional al cuadrado de la distancia que las separa.</p>
+                
+                <div class="formula">
+                    F = k · |q₁ · q₂| / r²
+                </div>
+                
+                <p><strong>Donde:</strong></p>
+                <p><strong>F</strong> = Magnitud de la fuerza eléctrica (N)</p>
+                <p><strong>k</strong> = Constante de Coulomb = 8.99 × 10⁹ N·m²/C²</p>
+                <p><strong>q₁, q₂</strong> = Cargas eléctricas (C)</p>
+                <p><strong>r</strong> = Distancia entre las cargas (m)</p>
+
+                <p>En forma vectorial, considerando la dirección de la fuerza:</p>
+                
+                <div class="formula">
+                    F⃗₁₂ = k · (q₁ · q₂) / r² · r̂₁₂
+                </div>
+                
+                <p>El <strong>Principio de Superposición</strong> establece que cuando hay múltiples cargas, la fuerza neta sobre una carga es la suma vectorial de todas las fuerzas individuales.</p>
+            </div>
+            <div>
+                <a href="calc_Basica.html?calc=coulomb" class="cta-button">Ir a Calculadora</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campo Eléctrico Section -->
+    <section class="section" id="magnetismo">
+        <div class="card" id="campo">
+            <h2 class="section-title">🔷 Campo Eléctrico</h2>
+            <div class="theory-content">
+                <p>El <strong>Campo Eléctrico</strong> es una propiedad del espacio que rodea a una carga eléctrica. Representa la fuerza por unidad de carga que experimentaría una carga de prueba positiva colocada en ese punto.</p>
+                
+                <div class="formula">
+                    E⃗ = F⃗ / q₀ = k · q / r² · r̂
+                </div>
+                
+                <p><strong>Donde:</strong></p>
+                <p><strong>E⃗</strong> = Campo eléctrico (N/C o V/m)</p>
+                <p><strong>q₀</strong> = Carga de prueba (C)</p>
+                <p><strong>q</strong> = Carga fuente (C)</p>
+                <p><strong>r̂</strong> = Vector unitario radial</p>
+
+                <p><strong>Distribuciones continuas de carga:</strong></p>
+                <p>Para distribuciones lineales (λ), superficiales (σ) o volumétricas (ρ):</p>
+                
+                <div class="formula">
+                    E⃗ = k ∫ (dq / r²) · r̂
+                </div>
+                
+                <p>Donde <strong>dq = λ·dl</strong> (lineal), <strong>dq = σ·dA</strong> (superficial), o <strong>dq = ρ·dV</strong> (volumétrica)</p>
+
+                <p>Las <strong>líneas de campo eléctrico</strong> son tangentes al vector E⃗ en cada punto, salen de cargas positivas y entran en cargas negativas.</p>
+            </div>
+            <div>
+                <a href="calc_Basica.html?calc=electric-field" class="cta-button">Ir a Calculadora</a>   
+            </div>
+        </div>
+    </section>
+
+    <!-- Ley de Gauss Section -->
+    <section class="section" id="circuitos">
+        <div class="card" id="gauss">
+            <h2 class="section-title">🔵 Ley de Gauss</h2>
+            <div class="theory-content">
+                <p>La <strong>Ley de Gauss</strong> es una de las ecuaciones fundamentales de Maxwell y relaciona el flujo eléctrico a través de una superficie cerrada con la carga neta encerrada.</p>
+                
+                <div class="formula">
+                    Φₑ = ∮ E⃗ · dA⃗ = Qₑₙc / ε₀
+                </div>
+                
+                <p><strong>Donde:</strong></p>
+                <p><strong>Φₑ</strong> = Flujo eléctrico (N·m²/C)</p>
+                <p><strong>Qₑₙc</strong> = Carga neta encerrada (C)</p>
+                <p><strong>ε₀</strong> = Permitividad del vacío = 8.85 × 10⁻¹² C²/(N·m²)</p>
+
+                <p><strong>Forma diferencial (Ecuación de Maxwell):</strong></p>
+                
+                <div class="formula">
+                    ∇ · E⃗ = ρ / ε₀
+                </div>
+
+                <p><strong>Superficies Gaussianas:</strong></p>
+                <p>La elección de la superficie gaussiana adecuada es crucial. Se utilizan:</p>
+                <p>• <strong>Superficies esféricas</strong>: Para cargas puntuales o distribuciones con simetría esférica</p>
+                <p>• <strong>Superficies cilíndricas</strong>: Para líneas de carga infinitas o distribuciones con simetría cilíndrica</p>
+                <p>• <strong>Superficies tipo "caja"</strong>: Para planos infinitos con carga uniforme</p>
+
+                <p>La ley de Gauss es especialmente útil cuando existe simetría, permitiendo calcular el campo eléctrico sin necesidad de integración compleja.</p>
+            </div>
+            <div>
+                <a href="calc_Basica.html?calc=gauss" class="cta-button">Ir a Calculadora</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scroll to top button -->
+    <a href="#inicio" class="scroll-top" id="btnTop">↑</a>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        const btnTop = document.getElementById('btnTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // Show/hide scroll to top button
+            if (window.scrollY > 300) {
+                btnTop.classList.add('visible');
+            } else {
+                btnTop.classList.remove('visible');
+            }
+        });
+
+        // Hamburger menu
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Mobile dropdown toggle
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            dropdown.addEventListener('click', (e) => {
+                if (window.innerWidth <= 767) {
+                    dropdown.classList.toggle('active');
+                    e.stopPropagation();
+                }
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
