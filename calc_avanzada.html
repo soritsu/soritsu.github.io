@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Avanzada - Ley de Coulomb</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 0;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .navbar.scrolled {
+            background: rgba(10, 14, 39, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo span {
+            font-size: 1.5rem;
+        }
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+        .nav-menu a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .nav-menu a:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #00d4ff;
+            border-radius: 3px;
+            transition: 0.3s;
+        }
+        .dropdown {
+            position: relative;
+        }
+        .dropdown-toggle {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .dropdown-toggle::after {
+            content: '▼';
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+        .dropdown:hover .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(10, 14, 39, 0.95);
+            min-width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dropdown-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease;
+        }
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+        .dropdown-menu a:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+        /* Main Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 50px 1rem 2rem 1rem;
+            border-radius: 20px; 
+            margin-top: 50px;
+            box-shadow: 0 20px 40px rgba(0,212,255,0.2);
+            overflow: hidden;  
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            opacity: 0.95;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            gap: 0;
+            min-height: calc(100vh - 150px);
+        }
+
+        /* PANEL IZQUIERDO */
+        .izq_panel {
+            background: rgb(255, 255, 255, 0.05);;
+            border-radius: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 130px);
+        }
+
+        .titulo {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .categorias {
+            background: linear-gradient(135deg, #00d4ff 0%, #8a2be2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 12px 15px;
+            margin: 20px 0px 10px 0px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .categorias:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,212,255,0.5);
+        }
+
+        .categorias::after {
+            content: '▼';
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .categorias.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .category-content:not(.collapsed) {
+            max-height: 500px; 
+            opacity: 1;
+        }
+        .category-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .figure-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 6px 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            color: #333;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .figure-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .figure-btn.active {
+            background: #764ba2;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .parametros {
+            background: rgba(138, 43, 226, 0.1);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        #paramInputs {
+            margin: 15px 0;
+        }
+
+        .param-group {
+            margin-bottom: 12px;
+        }
+
+        .param-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #b0b8c8;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .param-group input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #e0e0e0;
+            color:#fff;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .param-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .ayuda {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #856404;
+        }
+
+        .ayuda strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* ÁREA CENTRAL */
+        .canvas-area {
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            background: rgb(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 20px;
+            background: rgb(255,255,255,0.05);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tool-btn {
+            padding: 10px 18px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tool-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #667eea;
+        }
+
+        .tool-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        #canvas {
+            flex: 1;
+            border-radius: 20px;
+            width: 100%;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .controls-info {
+            position: absolute;
+            top: 25px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 12px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.75em;
+            max-width: 200px;
+            z-index: 10;
+        }
+        
+        .controls-info h4 {
+            color: #4fc3f7;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .controls-info p {
+            margin: 4px 0;
+            opacity: 0.9;
+            font-size: 0.85em;
+        }
+
+        /* PANEL DERECHO */
+        .derecho_panel {
+            background: rgb(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 130px);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #764ba2;
+        }
+
+        #objectsList, #pointsList, #resultsList {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 80px;
+        }
+
+        .object-item, .point-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .object-item:hover, .point-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #667eea;
+        }
+
+        .result-item {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(129, 199, 132, 0.2) 100%);
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .result-item h4 {
+            color: #4fc3f7;
+            margin-bottom: 8px;
+        }
+
+        .figura {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 0.9em;
+            border-left: 4px solid #4fc3f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            color: #fff;
+        }
+        
+        .figura:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .figura button {
+            width: auto;
+            padding: 5px 12px;
+            margin: 0;
+            font-size: 1.2em;
+            background: rgba(244, 67, 54, 0.8);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .figura button:hover {
+            background: rgba(244, 67, 54, 1);
+        }
+
+        .no-figuras {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 250px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .izq_panel, .derecho_panel {
+                max-height: none;
+                border: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .canvas-area {
+                order: 2;
+            }
+
+            .izq_panel {
+                order: 1;
+            }
+
+            .derecho_panel {
+                order: 3;
+            }
+
+            #canvas {
+                min-height: 400px;
+                height: 400px;
+            }
+        }
+
+        /* Scrollbar personalizado */
+        .izq_panel::-webkit-scrollbar,
+        .derecho_panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .izq_panel::-webkit-scrollbar-track,
+        .derecho_panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .izq_panel::-webkit-scrollbar-thumb,
+        .derecho_panel::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .izq_panel::-webkit-scrollbar-thumb:hover,
+        .derecho_panel::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#inicio" class="logo">
+                <span>⚡</span> Electrostática
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="H_seccion.html">Ley de Coulomb</a></li>
+                <li><a href="H_seccion.html">Campo Eléctrico</a></li>
+                <li><a href="H_seccion.html">Ley de Gauss</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle">Calculadora Basica</a>
+                    <div class="dropdown-menu">
+                        <a href="calc_Basica.html?calc=coulomb">Ley de Coulomb</a>
+                        <a href="calc_Basica.html?calc=electric-field">Campo Eléctrico</a>
+                        <a href="calc_Basica.html?calc=gauss">Ley de Gauss</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="calc_avanzada.html">Calculadora avanzada</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <!--  calculadora  -->
+        <div class="main-content">
+            <!-- PANEL IZQUIERDO -->
+            <div class="izq_panel">
+                <div class="titulo">Distribuciones de Carga</div>
+                
+                <div class="categorias collapsed" data-category="linear">Lineales (λ)</div>
+                <div class="category-content collapsed" data-category="linear">
+                    <button class="figure-btn" data-type="linear" data-shape="punto">🔴 Carga Puntual</button>
+                    <button class="figure-btn" data-type="linear" data-shape="linea">📏 Línea Recta</button>
+                    <button class="figure-btn" data-type="linear" data-shape="anillo">⭕ Anillo Completo</button>
+                </div>
+                
+                <div class="categorias collapsed" data-category="surface">Superficiales (σ)</div>
+                <div class="category-content collapsed" data-category="surface">
+                    <button class="figure-btn" data-type="surface" data-shape="disco">💿 Disco Circular</button>
+                </div>
+                
+                <div class="categorias collapsed" data-category="volume">Volumétricas (ρ)</div>
+                <div class="category-content collapsed" data-category="volume">
+                    <button class="figure-btn" data-type="volume" data-shape="esfera">🌍 Esfera Sólida</button>
+                    <button class="figure-btn" data-type="volume" data-shape="cilindro">🥫 Cilindro Sólido</button>
+                </div>
+
+                <div class="parametros" id="paramSeccion">
+                    <div class="titulo">Parámetros</div>
+                    <div id="paramInputs">
+                        <p style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px;">
+                            Selecciona una distribución
+                        </p>
+                    </div>
+                    <button class="add-btn" id="addBtn" onclick="agregarFigura()">➕ Agregar Distribución</button>
+                </div>
+
+                <div class="ayuda">
+                    <strong>💡 Guía de Uso</strong>
+                    1️⃣ Selecciona una distribución<br>
+                    2️⃣ Ajusta los parámetros<br>
+                    3️⃣ Click en "Agregar Distribución"<br>
+                    4️⃣ Configura punto de evaluación<br>
+                    5️⃣ Click en "Calcular Campo"
+                </div>
+            </div>
+
+            <!-- ÁREA CENTRAL -->
+            <div class="canvas-area">
+                <div class="toolbar">
+                    <button class="tool-btn" onclick="calcularCampo()">🧮 Calcular Campo</button>
+                    <button class="tool-btn" onclick="limpiarTodo()">🗑️ Limpiar Todo</button>
+                </div>
+                <div id="canvas">
+                    <div class="controls-info">
+                        <h4>🎮 Controles</h4>
+                        <p><strong>Rotar:</strong> Click izq + Arrastrar</p>
+                        <p><strong>Zoom:</strong> Rueda</p>
+                        <p><strong>Mover:</strong> Click der + Arrastrar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO -->
+            <div class="derecho_panel">
+                <div class="titulo">📋 Distribuciones Activas</div>
+                <div id="objectsList">
+                    <div class="no-figuras">No hay distribuciones agregadas</div>
+                </div>
+
+                <div class="titulo">📍 Punto de Evaluación</div>
+                <div id="pointsList">
+                    <div class="param-group">
+                        <label>Coordenada X (m)</label>
+                        <input type="number" id="px" value="5" step="0.1"/>
+                    </div>
+                    <div class="param-group">
+                        <label>Coordenada Y (m)</label>
+                        <input type="number" id="py" value="0" step="0.1"/>
+                    </div>
+                    <div class="param-group">
+                        <label>Coordenada Z (m)</label>
+                        <input type="number" id="pz" value="0" step="0.1"/>
+                    </div>
+                </div>
+
+                <div class="titulo">📊 Resultados del Cálculo</div>
+                <div id="resultsList">
+                    <div style="color: #fff; padding: 10px;">
+                        <strong style="color: #4fc3f7;">Campo Eléctrico:</strong><br>
+                        <span style="font-size: 1.2em;">E = <span id="E">0</span> N/C</span><br>
+                        <strong style="color: #4fc3f7; margin-top: 10px; display: block;">Dirección:</strong>
+                        <span id="angulos">θ=0°, φ=0°</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === IMPLEMENTACIÓN DE ORBITCONTROLS ===
+        THREE.OrbitControls = function(camera, domElement) {
+            this.camera = camera;
+            this.domElement = domElement;
+            this.enabled = true;
+            this.enableDamping = true;
+            this.dampingFactor = 0.05;
+            
+            const scope = this;
+            const STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
+            let state = STATE.NONE;
+            
+            const spherical = { radius: 10, theta: 0, phi: Math.PI / 4 };
+            const target = new THREE.Vector3(0, 0, 0);
+            const offset = new THREE.Vector3();
+            
+            const rotateStart = new THREE.Vector2();
+            const rotateEnd = new THREE.Vector2();
+            const rotateDelta = new THREE.Vector2();
+            
+            const panStart = new THREE.Vector2();
+            const panEnd = new THREE.Vector2();
+            const panDelta = new THREE.Vector2();
+            
+            function onMouseDown(event) {
+                if (!scope.enabled) return;
+                event.preventDefault();
+                
+                if (event.button === 0) {
+                    state = STATE.ROTATE;
+                    rotateStart.set(event.clientX, event.clientY);
+                } else if (event.button === 2) {
+                    state = STATE.PAN;
+                    panStart.set(event.clientX, event.clientY);
+                }
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }
+            
+            function onMouseMove(event) {
+                if (!scope.enabled) return;
+                event.preventDefault();
+                
+                if (state === STATE.ROTATE) {
+                    rotateEnd.set(event.clientX, event.clientY);
+                    rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(0.005);
+                    
+                    spherical.theta -= rotateDelta.x;
+                    spherical.phi -= rotateDelta.y;
+                    spherical.phi = Math.max(0.01, Math.min(Math.PI - 0.01, spherical.phi));
+                    
+                    rotateStart.copy(rotateEnd);
+                } else if (state === STATE.PAN) {
+                    panEnd.set(event.clientX, event.clientY);
+                    panDelta.subVectors(panEnd, panStart).multiplyScalar(0.01);
+                    
+                    const right = new THREE.Vector3();
+                    const up = new THREE.Vector3(0, 1, 0);
+                    right.crossVectors(up, offset).normalize().multiplyScalar(panDelta.x);
+                    up.multiplyScalar(-panDelta.y);
+                    
+                    target.add(right).add(up);
+                    panStart.copy(panEnd);
+                }
+            }
+            
+            function onMouseUp() {
+                if (!scope.enabled) return;
+                state = STATE.NONE;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            
+            function onMouseWheel(event) {
+                if (!scope.enabled) return;
+                event.preventDefault();
+                
+                if (event.deltaY < 0) {
+                    spherical.radius *= 0.9;
+                } else {
+                    spherical.radius *= 1.1;
+                }
+                spherical.radius = Math.max(1, Math.min(100, spherical.radius));
+            }
+            
+            this.update = function() {
+                offset.x = spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+                offset.y = spherical.radius * Math.cos(spherical.phi);
+                offset.z = spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+                
+                camera.position.copy(target).add(offset);
+                camera.lookAt(target);
+            };
+            
+            domElement.addEventListener('mousedown', onMouseDown);
+            domElement.addEventListener('wheel', onMouseWheel);
+            domElement.addEventListener('contextmenu', e => e.preventDefault());
+            
+            // Inicializar posición
+            offset.copy(camera.position).sub(target);
+            spherical.radius = offset.length();
+            spherical.theta = Math.atan2(offset.x, offset.z);
+            spherical.phi = Math.acos(offset.y / spherical.radius);
+        };
+
+        // === THREE.JS SETUP ===
+        let scene, camera, renderer, controls;
+        let figuras = [];
+        let flecha, puntoEval;
+        let idCounter = 0;
+        const k = 8.99e9;
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.Fog(0x0a0a1a, 20, 50);
+
+            const canvasContainer = document.getElementById('canvas');
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            camera.position.set(15, 12, 15);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            canvasContainer.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+
+            // Luces mejoradas
+            const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 15, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x4fc3f7, 0.5, 50);
+            pointLight.position.set(-10, 10, -10);
+            scene.add(pointLight);
+
+            // Grid mejorado
+            const gridHelper = new THREE.GridHelper(20, 20, 0x4fc3f7, 0x1a1a2e);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+
+            // Ejes con colores
+            const axesHelper = new THREE.AxesHelper(8);
+            scene.add(axesHelper);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // === PARÁMETROS POR TIPO ===
+        const paramDefs = {
+            punto: { q: 1e-6, x: 0, y: 0, z: 0 },
+            linea: { λ: 1e-6, x1: -2, y1: 0, z1: 0, x2: 2, y2: 0, z2: 0 },
+            anillo: { λ: 1e-6, cx: 0, cy: 0, cz: 0, r: 2 },
+            disco: { σ: 1e-6, cx: 0, cy: 0, cz: 0, r: 2 },
+            esfera: { ρ: 1e-9, cx: 0, cy: 0, cz: 0, r: 1.5 },
+            cilindro: { ρ: 1e-9, cx: 0, cy: 0, cz1: -2, cz2: 2, r: 1 }
+        };
+
+        const paramLabels = {
+            q: 'Carga (C)', λ: 'Densidad lineal λ (C/m)', σ: 'Densidad superficial σ (C/m²)',
+            ρ: 'Densidad volumétrica ρ (C/m³)', r: 'Radio (m)',
+            x: 'X (m)', y: 'Y (m)', z: 'Z (m)',
+            x1: 'X₁ (m)', y1: 'Y₁ (m)', z1: 'Z₁ (m)',
+            x2: 'X₂ (m)', y2: 'Y₂ (m)', z2: 'Z₂ (m)',
+            cx: 'Centro X (m)', cy: 'Centro Y (m)', cz: 'Centro Z (m)',
+            cz1: 'Z inicial (m)', cz2: 'Z final (m)'
+        };
+
+        let currentShape = null;
+
+        // Funcionalidad de colapsar/expandir categorías
+        document.querySelectorAll('.categorias').forEach(categoria => {
+            categoria.addEventListener('click', function() {
+                const categoryName = this.dataset.category;
+                const content = document.querySelector(`.category-content[data-category="${categoryName}"]`);
+                
+                this.classList.toggle('collapsed');
+                content.classList.toggle('collapsed');
+            });
+        });
+    
+        // Funcionalidad de selección de botones
+        document.querySelectorAll('.figure-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.figure-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const shape = this.dataset.shape;
+                currentShape = shape;
+                actualizarParametros(shape);
+            });
+        });
+
+        function actualizarParametros(shape) {
+            const cont = document.getElementById('paramInputs');
+            cont.innerHTML = '';
+            const def = paramDefs[shape];
+            
+            if (!def) return;
+            
+            for (const [key, val] of Object.entries(def)) {
+                const group = document.createElement('div');
+                group.className = 'param-group';
+                
+                const label = document.createElement('label');
+                label.textContent = paramLabels[key] || key;
+                group.appendChild(label);
+                
+                const input = document.createElement('input');
+                input.placeholder = paramLabels[key] || key;
+                input.value = val;
+                input.id = 'p_' + key;
+                input.type = 'number';
+                input.step = 'any';
+                group.appendChild(input);
+                
+                cont.appendChild(group);
+            }
+        }
+
+        // === AGREGAR FIGURA ===
+        function agregarFigura() {
+            if (!currentShape) {
+                alert('Por favor selecciona una distribución primero');
+                return;
+            }
+            
+            const data = { id: idCounter++, tipo: currentShape };
+            const def = paramDefs[currentShape];
+            
+            for (const key of Object.keys(def)) {
+                const val = parseFloat(document.getElementById('p_' + key).value);
+                if (isNaN(val)) {
+                    alert(`Por favor ingresa un valor válido para ${paramLabels[key]}`);
+                    return;
+                }
+                data[key] = val;
+            }
+            
+            figuras.push(data);
+            crearGeometria(data);
+            actualizarLista();
+        }
+
+        // === CREAR GEOMETRÍA VISUAL ===
+        function crearGeometria(fig) {
+            let obj;
+            const esPositiva = fig.q > 0 || fig.λ > 0 || fig.σ > 0 || fig.ρ > 0;
+            const color = esPositiva ? 0xff4444 : 0x4444ff;
+            const emissive = esPositiva ? 0x882222 : 0x222288;
+
+            switch(fig.tipo) {
+                case 'punto':
+                    const geo = new THREE.SphereGeometry(0.4, 24, 24);
+                    const mat = new THREE.MeshPhongMaterial({ 
+                        color, 
+                        emissive, 
+                        emissiveIntensity: 0.3,
+                        shininess: 100
+                    });
+                    obj = new THREE.Mesh(geo, mat);
+                    obj.position.set(fig.x, fig.y, fig.z);
+                    obj.castShadow = true;
+                    break;
+
+                case 'linea':
+                    const points = [
+                        new THREE.Vector3(fig.x1, fig.y1, fig.z1), 
+                        new THREE.Vector3(fig.x2, fig.y2, fig.z2)
+                    ];
+                    const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                    const lineMat = new THREE.LineBasicMaterial({ color, linewidth: 2 });
+                    obj = new THREE.Line(lineGeo, lineMat);
+                    
+                    const sphereGeo = new THREE.SphereGeometry(0.2, 16, 16);
+                    const sphereMat = new THREE.MeshPhongMaterial({ color });
+                    const s1 = new THREE.Mesh(sphereGeo, sphereMat);
+                    const s2 = new THREE.Mesh(sphereGeo, sphereMat);
+                    s1.position.copy(points[0]);
+                    s2.position.copy(points[1]);
+                    obj.add(s1);
+                    obj.add(s2);
+                    break;
+
+                case 'anillo':
+                    const curve = new THREE.EllipseCurve(0, 0, fig.r, fig.r, 0, Math.PI * 2, false);
+                    const pts = curve.getPoints(100);
+                    const ringGeo = new THREE.BufferGeometry().setFromPoints(
+                        pts.map(p => new THREE.Vector3(p.x, 0, p.y))
+                    );
+                    const ringMat = new THREE.LineBasicMaterial({ color, linewidth: 2 });
+                    obj = new THREE.Line(ringGeo, ringMat);
+                    obj.position.set(fig.cx, fig.cy, fig.cz);
+                    break;
+
+                case 'disco':
+                    const diskGeo = new THREE.CircleGeometry(fig.r, 64);
+                    const diskMat = new THREE.MeshPhongMaterial({ 
+                        color, 
+                        side: THREE.DoubleSide, 
+                        opacity: 0.6, 
+                        transparent: true,
+                        emissive,
+                        emissiveIntensity: 0.2
+                    });
+                    obj = new THREE.Mesh(diskGeo, diskMat);
+                    obj.position.set(fig.cx, fig.cy, fig.cz);
+                    obj.rotation.x = Math.PI / 2;
+                    break;
+
+                case 'esfera':
+                    const spheraGeo = new THREE.SphereGeometry(fig.r, 32, 32);
+                    const spheraMat = new THREE.MeshPhongMaterial({ 
+                        color, 
+                        opacity: 0.5, 
+                        transparent: true,
+                        emissive,
+                        emissiveIntensity: 0.2
+                    });
+                    obj = new THREE.Mesh(spheraGeo, spheraMat);
+                    obj.position.set(fig.cx, fig.cy, fig.cz);
+                    
+                    const wireGeo = new THREE.SphereGeometry(fig.r, 16, 16);
+                    const wireMat = new THREE.MeshBasicMaterial({ 
+                        color, 
+                        wireframe: true, 
+                        opacity: 0.3, 
+                        transparent: true 
+                    });
+                    const wire = new THREE.Mesh(wireGeo, wireMat);
+                    obj.add(wire);
+                    break;
+
+                case 'cilindro':
+                    const altura = Math.abs(fig.cz2 - fig.cz1);
+                    const cylGeo = new THREE.CylinderGeometry(fig.r, fig.r, altura, 32);
+                    const cylMat = new THREE.MeshPhongMaterial({ 
+                        color, 
+                        opacity: 0.5, 
+                        transparent: true,
+                        emissive,
+                        emissiveIntensity: 0.2
+                    });
+                    obj = new THREE.Mesh(cylGeo, cylMat);
+                    obj.position.set(fig.cx, (fig.cz1 + fig.cz2) / 2, fig.cy);
+                    obj.rotation.z = Math.PI / 2;
+                    
+                    const cylWireGeo = new THREE.CylinderGeometry(fig.r, fig.r, altura, 16);
+                    const cylWireMat = new THREE.MeshBasicMaterial({ 
+                        color, 
+                        wireframe: true, 
+                        opacity: 0.3, 
+                        transparent: true 
+                    });
+                    const cylWire = new THREE.Mesh(cylWireGeo, cylWireMat);
+                    obj.add(cylWire);
+                    break;
+            }
+
+            if (obj) {
+                obj.userData = { id: fig.id };
+                scene.add(obj);
+            }
+        }
+
+        // === LISTA DE FIGURAS ===
+        function actualizarLista() {
+            const lista = document.getElementById('objectsList');
+            
+            if (figuras.length === 0) {
+                lista.innerHTML = '<div class="no-figuras">No hay distribuciones agregadas</div>';
+                return;
+            }
+            
+            lista.innerHTML = '';
+            figuras.forEach((f, i) => {
+                const div = document.createElement('div');
+                div.className = 'figura';
+                
+                const tipoNombre = {
+                    punto: '🔴 Punto',
+                    linea: '📏 Línea',
+                    anillo: '⭕ Anillo',
+                    disco: '💿 Disco',
+                    esfera: '🌍 Esfera',
+                    cilindro: '🥫 Cilindro'
+                };
+                
+                div.innerHTML = `
+                    <span><strong>${tipoNombre[f.tipo]}</strong> #${i+1}</span>
+                    <button onclick="eliminarFigura(${f.id})">×</button>
+                `;
+                lista.appendChild(div);
+            });
+        }
+
+        function eliminarFigura(id) {
+            figuras = figuras.filter(f => f.id !== id);
+            
+            const objetosAEliminar = [];
+            scene.traverse(obj => {
+                if (obj.userData && obj.userData.id === id) {
+                    objetosAEliminar.push(obj);
+                }
+            });
+            
+            objetosAEliminar.forEach(obj => {
+                scene.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+            
+            actualizarLista();
+        }
+
+        function limpiarTodo() {
+            if (figuras.length === 0) return;
+            
+            if (confirm('¿Eliminar todas las distribuciones de carga?')) {
+                figuras.forEach(f => eliminarFigura(f.id));
+                figuras = [];
+                actualizarLista();
+                
+                if (flecha) {
+                    scene.remove(flecha);
+                    flecha = null;
+                }
+                if (puntoEval) {
+                    scene.remove(puntoEval);
+                    puntoEval = null;
+                }
+                
+                document.getElementById('E').textContent = '0';
+                document.getElementById('angulos').textContent = 'θ=0°, φ=0°';
+            }
+        }
+
+        // === CÁLCULO DEL CAMPO ===
+        function calcularCampo() {
+            if (figuras.length === 0) {
+                alert('Primero agrega al menos una distribución de carga');
+                return;
+            }
+            
+            const px = parseFloat(document.getElementById('px').value);// punto de evaluación 
+            const py = parseFloat(document.getElementById('py').value);
+            const pz = parseFloat(document.getElementById('pz').value);
+
+            if (isNaN(px) || isNaN(py) || isNaN(pz)) {
+                alert('Por favor ingresa coordenadas válidas');
+                return;
+            }
+
+            let Ex = 0, Ey = 0, Ez = 0; //
+
+            figuras.forEach(fig => {
+                let dE;// Componente diferencial del campo
+                switch(fig.tipo) {
+                    case 'punto': 
+                        dE = campoPunto(fig.q, fig.x, fig.y, fig.z, px, py, pz); 
+                        break;
+                    case 'linea': 
+                        dE = campoLinea(fig.λ, fig.x1, fig.y1, fig.z1, fig.x2, fig.y2, fig.z2, px, py, pz); 
+                        break;
+                    case 'anillo': 
+                        dE = campoAnillo(fig.λ, fig.cx, fig.cy, fig.cz, fig.r, px, py, pz); 
+                        break;
+                    case 'disco': 
+                        dE = campoDisco(fig.σ, fig.cx, fig.cy, fig.cz, fig.r, px, py, pz); 
+                        break;
+                    case 'esfera': 
+                        dE = campoEsfera(fig.ρ, fig.cx, fig.cy, fig.cz, fig.r, px, py, pz); 
+                        break;
+                    case 'cilindro': 
+                        dE = campoCilindro(fig.ρ, fig.cx, fig.cy, fig.cz1, fig.cz2, fig.r, px, py, pz); 
+                        break;
+                }
+                Ex += dE[0]; 
+                Ey += dE[1]; 
+                Ez += dE[2];
+            });
+
+            const mag = Math.sqrt(Ex*Ex + Ey*Ey + Ez*Ez);
+            const theta = Math.acos(Ez / (mag + 1e-20)) * 180 / Math.PI;
+            const phi = Math.atan2(Ey, Ex) * 180 / Math.PI;
+
+            document.getElementById('E').textContent = mag.toExponential(3);
+            document.getElementById('angulos').textContent = `θ=${theta.toFixed(1)}°, φ=${phi.toFixed(1)}°`;
+
+            dibujarVectorCampo(px, py, pz, Ex, Ey, Ez, mag);
+        }
+
+        // === FUNCIONES DE CAMPO ===
+        function campoPunto(q, x, y, z, px, py, pz) {
+            const dx = px - x, dy = py - y, dz = pz - z;
+            const r = Math.sqrt(dx*dx + dy*dy + dz*dz);
+            if (r < 1e-10) return [0, 0, 0];
+            const E = k * q / (r * r);
+            return [E * dx/r, E * dy/r, E * dz/r];
+        }
+
+        function campoLinea(λ, x1, y1, z1, x2, y2, z2, px, py, pz) {
+            const N = 100;
+            let Ex = 0, Ey = 0, Ez = 0;
+            const L = Math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2);
+            const dl = L / N;
+            
+            for (let i = 0; i < N; i++) {
+                const t = (i + 0.5) / N;
+                const x = x1 + t * (x2 - x1);
+                const y = y1 + t * (y2 - y1);
+                const z = z1 + t * (z2 - z1);
+                const dq = λ * dl;
+                const [dEx, dEy, dEz] = campoPunto(dq, x, y, z, px, py, pz);
+                Ex += dEx; 
+                Ey += dEy; 
+                Ez += dEz;
+            }
+            return [Ex, Ey, Ez];
+        }
+
+        function campoAnillo(λ, cx, cy, cz, r, px, py, pz) {
+            const N = 120;
+            let Ex = 0, Ey = 0, Ez = 0;
+            const dl = 2 * Math.PI * r / N;
+            
+            for (let i = 0; i < N; i++) {
+                const θ = i * 2 * Math.PI / N;
+                const x = cx + r * Math.cos(θ);
+                const y = cy;
+                const z = cz + r * Math.sin(θ);
+                const dq = λ * dl;
+                const [dEx, dEy, dEz] = campoPunto(dq, x, y, z, px, py, pz);
+                Ex += dEx; 
+                Ey += dEy; 
+                Ez += dEz;
+            }
+            return [Ex, Ey, Ez];
+        }
+
+        function campoDisco(σ, cx, cy, cz, r, px, py, pz) {
+            const NR = 20, NT = 40;
+            let Ex = 0, Ey = 0, Ez = 0;
+            
+            for (let i = 0; i < NR; i++) {
+                const rho = (i + 0.5) * r / NR;
+                const dr = r / NR;
+                const dA = 2 * Math.PI * rho * dr / NT;
+                
+                for (let j = 0; j < NT; j++) {
+                    const θ = j * 2 * Math.PI / NT;
+                    const x = cx + rho * Math.cos(θ);
+                    const y = cy;
+                    const z = cz + rho * Math.sin(θ);
+                    const dq = σ * dA;
+                    const [dEx, dEy, dEz] = campoPunto(dq, x, y, z, px, py, pz);
+                    Ex += dEx; 
+                    Ey += dEy; 
+                    Ez += dEz;
+                }
+            }
+            return [Ex, Ey, Ez];
+        }
+
+        function campoEsfera(ρ, cx, cy, cz, r, px, py, pz) {
+            const N = 25;
+            let Ex = 0, Ey = 0, Ez = 0;
+            
+            for (let i = 0; i < N; i++) {
+                for (let j = 0; j < N; j++) {
+                    const theta = (i + 0.5) * Math.PI / N;
+                    const phi = (j + 0.5) * 2 * Math.PI / N;
+                    
+                    const rLocal = r * Math.pow((i + 0.5) / N, 1/3);
+                    const x = cx + rLocal * Math.sin(theta) * Math.cos(phi);
+                    const y = cy + rLocal * Math.cos(theta);
+                    const z = cz + rLocal * Math.sin(theta) * Math.sin(phi);
+                    
+                    const dV = (4/3) * Math.PI * r**3 / (N * N);
+                    const dq = ρ * dV;
+                    const [dEx, dEy, dEz] = campoPunto(dq, x, y, z, px, py, pz);
+                    Ex += dEx; 
+                    Ey += dEy; 
+                    Ez += dEz;
+                }
+            }
+            return [Ex, Ey, Ez];
+        }
+
+        function campoCilindro(ρ, cx, cy, cz1, cz2, r, px, py, pz) {
+            const NZ = 30, NR = 15, NT = 20;
+            let Ex = 0, Ey = 0, Ez = 0;
+            const h = cz2 - cz1;
+            
+            for (let k = 0; k < NZ; k++) {
+                const y = cy + cz1 + (k + 0.5) * h / NZ;
+                
+                for (let i = 0; i < NR; i++) {
+                    const rho = (i + 0.5) * r / NR;
+                    const dr = r / NR;
+                    const dz = h / NZ;
+                    const dV = 2 * Math.PI * rho * dr * dz / NT;
+                    
+                    for (let j = 0; j < NT; j++) {
+                        const θ = j * 2 * Math.PI / NT;
+                        const x = cx + rho * Math.cos(θ);
+                        const z = py + rho * Math.sin(θ);
+                        const dq = ρ * dV;
+                        const [dEx, dEy, dEz] = campoPunto(dq, x, y, z, px, py, pz);
+                        Ex += dEx; 
+                        Ey += dEy; 
+                        Ez += dEz;
+                    }
+                }
+            }
+            return [Ex, Ey, Ez];
+        }
+
+        // === DIBUJAR VECTOR DEL CAMPO ===
+        function dibujarVectorCampo(px, py, pz, Ex, Ey, Ez, mag) {
+            if (flecha) {
+                scene.remove(flecha);
+                flecha.traverse(obj => {
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                });
+            }
+            if (puntoEval) {
+                scene.remove(puntoEval);
+                puntoEval.traverse(obj => {
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                });
+            }
+            
+            if (mag < 1e-20) {
+                alert('El campo eléctrico en este punto es prácticamente cero');
+                return;
+            }
+
+            const puntoGeo = new THREE.SphereGeometry(0.3, 16, 16);
+            const puntoMat = new THREE.MeshPhongMaterial({ 
+                color: 0xffffff,
+                emissive: 0xffff00,
+                emissiveIntensity: 0.5
+            });
+            puntoEval = new THREE.Mesh(puntoGeo, puntoMat);
+            puntoEval.position.set(px, py, pz);
+            scene.add(puntoEval);
+
+            const dir = new THREE.Vector3(Ex, Ey, Ez).normalize();
+            const origin = new THREE.Vector3(px, py, pz);
+            
+            const longitud = Math.min(5, Math.max(1, Math.log10(mag + 1) * 0.5));
+            
+            const arrowGroup = new THREE.Group();
+            
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, longitud, 0)
+            ]);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 });
+            const line = new THREE.Line(lineGeo, lineMat);
+            arrowGroup.add(line);
+            
+            const coneGeo = new THREE.ConeGeometry(0.2, 0.5, 16);
+            const coneMat = new THREE.MeshPhongMaterial({ 
+                color: 0x00ff00,
+                emissive: 0x00ff00,
+                emissiveIntensity: 0.3
+            });
+            const cone = new THREE.Mesh(coneGeo, coneMat);
+            cone.position.y = longitud;
+            cone.rotation.x = Math.PI;
+            arrowGroup.add(cone);
+            
+            arrowGroup.position.copy(origin);
+            const quaternion = new THREE.Quaternion();
+            quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+            arrowGroup.setRotationFromQuaternion(quaternion);
+            
+            flecha = arrowGroup;
+            scene.add(flecha);
+        }
+
+        // === RESIZE ===
+        window.addEventListener('resize', () => {
+            const canvasContainer = document.getElementById('canvas');
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+
+        // === INICIAR ===
+        window.addEventListener('load', () => {
+            init();
+        });
+    </script>
+</body>
+</html>
